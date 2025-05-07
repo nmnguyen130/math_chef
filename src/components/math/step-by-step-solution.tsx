@@ -42,14 +42,8 @@ const StepByStepSolution: React.FC<StepByStepSolutionProps> = ({
 
   return (
     <View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "flex-end",
-          marginBottom: 8,
-        }}
-      >
-        <TouchableOpacity onPress={expandAll} style={{ marginRight: 16 }}>
+      <View className="flex-row justify-end mb-3">
+        <TouchableOpacity onPress={expandAll} className="mr-6">
           <Text color={colors.primary}>Expand All</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={collapseAll}>
@@ -58,15 +52,10 @@ const StepByStepSolution: React.FC<StepByStepSolutionProps> = ({
       </View>
 
       {steps.map((step, index) => (
-        <Card key={index} variant="outlined" style={{ marginBottom: 8 }}>
+        <Card key={index} variant="outlined" className="mb-2">
           <TouchableOpacity
             onPress={() => toggleStep(index)}
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 12,
-            }}
+            className="flex-row justify-between items-center px-3"
           >
             <Text weight="medium">Step {index + 1}</Text>
             <Icon>
@@ -79,8 +68,8 @@ const StepByStepSolution: React.FC<StepByStepSolutionProps> = ({
           </TouchableOpacity>
 
           {expandedSteps.includes(index) && (
-            <View style={{ padding: 12, paddingTop: 0 }}>
-              <Text style={{ marginBottom: 8 }}>{step.explanation}</Text>
+            <View className="p-3 pt-1">
+              <Text className="mb-2">{step.explanation}</Text>
               <MathEquation equation={step.equation} size="sm" />
             </View>
           )}

@@ -196,9 +196,10 @@ const ScanScreen = () => {
                 <View className="flex-row justify-between">
                   <Button
                     variant="primary"
-                    leftIcon={<Feather name="image" color={"#fff"} />}
+                    leftIcon={<Feather name="image" size={20} color={"#fff"} />}
                     onPress={pickImage}
                     style={{
+                      width: "30%",
                       borderColor: "white",
                       backgroundColor: "rgba(0,0,0,0.5)",
                     }}
@@ -208,8 +209,9 @@ const ScanScreen = () => {
 
                   <Button
                     variant="primary"
-                    leftIcon={<Ionicons name="scan" color={"#fff"} />}
+                    leftIcon={<Ionicons name="scan" size={20} color={"#fff"} />}
                     style={{
+                      width: "30%",
                       borderColor: "white",
                       backgroundColor: "rgba(0,0,0,0.5)",
                     }}
@@ -275,7 +277,9 @@ const ScanScreen = () => {
               <View className="flex-row my-2">
                 <Button
                   variant="outline"
-                  leftIcon={<Feather name="check" color={colors.primary} />}
+                  leftIcon={
+                    <Feather name="check" size={20} color={colors.primary} />
+                  }
                   className="flex-1 mr-2"
                   onPress={resetCamera}
                 >
@@ -301,7 +305,9 @@ const ScanScreen = () => {
 
               <Button
                 variant="outline"
-                leftIcon={<Feather name="check" color={colors.primary} />}
+                leftIcon={
+                  <Feather name="check" size={20} color={colors.primary} />
+                }
                 className="flex-1 mr-2"
                 onPress={resetCamera}
               >

@@ -219,7 +219,7 @@ const PracticeScreen = () => {
             </Text>
             <View className="flex-row items-center">
               <View className="mr-2">
-                <Feather name="download" size={20} color={colors.primary} />
+                <Feather name="download" size={24} color={colors.primary} />
               </View>
               <Text>Quadratic Equations Practice.pdf</Text>
             </View>

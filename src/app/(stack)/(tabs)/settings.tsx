@@ -10,17 +10,17 @@ const SettingsScreen = () => {
     {
       label: "Light Mode",
       value: "light",
-      icon: <Feather name="sun" color={colors.primary} />,
+      icon: <Feather name="sun" size={20} color={colors.primary} />,
     },
     {
       label: "Dark Mode",
       value: "dark",
-      icon: <Feather name="moon" color={colors.primary} />,
+      icon: <Feather name="moon" size={20} color={colors.primary} />,
     },
     {
       label: "System Default",
       value: "system",
-      icon: <Feather name="info" color={colors.primary} />,
+      icon: <Feather name="info" size={20} color={colors.primary} />,
     },
   ];
 
@@ -85,7 +85,7 @@ const SettingsScreen = () => {
               >
                 <View className="flex-row items-center">
                   <View className="mr-3">
-                    <Feather name="bell" color={colors.primary} />
+                    <Feather name="bell" size={20} color={colors.primary} />
                   </View>
                   <Text>{option.label}</Text>
                 </View>
@@ -101,7 +101,9 @@ const SettingsScreen = () => {
           </Text>
           <Button
             variant="outline"
-            leftIcon={<FontAwesome name="language" color={colors.primary} />}
+            leftIcon={
+              <FontAwesome name="language" size={20} color={colors.primary} />
+            }
             style={{ justifyContent: "space-between" }}
           >
             <Text>English (US)</Text>
@@ -115,14 +117,16 @@ const SettingsScreen = () => {
           </Text>
           <Button
             variant="outline"
-            leftIcon={<Feather name="help-circle" color={colors.primary} />}
+            leftIcon={
+              <Feather name="help-circle" size={20} color={colors.primary} />
+            }
             className="mb-2"
           >
             Help Center
           </Button>
           <Button
             variant="outline"
-            leftIcon={<Feather name="info" color={colors.primary} />}
+            leftIcon={<Feather name="info" size={20} color={colors.primary} />}
           >
             About
           </Button>

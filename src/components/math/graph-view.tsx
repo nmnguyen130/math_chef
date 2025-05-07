@@ -25,12 +25,8 @@ const GraphView: React.FC<GraphViewProps> = ({
   return (
     <Card variant="outlined">
       <View
-        style={{
-          height,
-          width: "100%",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className="w-full items-center justify-center"
+        style={{ height: height }}
       >
         <Text>Graph for: {equation}</Text>
         <Text variant="body-sm" color={colors.secondaryText}>

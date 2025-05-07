@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { useRef, useState } from "react";
-import { View, PanResponder, Animated, StyleSheet } from "react-native";
+import { View, PanResponder, StyleSheet } from "react-native";
+import Svg, { Path as SvgPath } from "react-native-svg";
 import { useTheme } from "@components/theme/theme-provider";
 import { BorderRadius } from "@constants/theme";
 
@@ -18,17 +19,19 @@ interface Path {
 interface DrawingCanvasProps {
   strokeColor?: string;
   strokeWidth?: number;
-  onPathsChange?: (paths: Path[]) => void;
+  paths: Path[];
+  setPaths: (value: Path[] | ((prev: Path[]) => Path[])) => void;
 }
 
 const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   strokeColor = "#000000",
   strokeWidth = 3,
-  onPathsChange,
+  paths,
+  setPaths,
 }) => {
   const { colors } = useTheme();
-  const [paths, setPaths] = useState<Path[]>([]);
-  const [currentPath, setCurrentPath] = useState<Point[]>([]);
+  const currentPointRef = useRef<Point[]>([]);
+  const [renderTrigger, setRenderTrigger] = useState(false);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -36,87 +39,78 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: (event) => {
         const { locationX, locationY } = event.nativeEvent;
-        setCurrentPath([{ x: locationX, y: locationY }]);
+        currentPointRef.current = [{ x: locationX, y: locationY }];
+        setRenderTrigger((prev) => !prev);
       },
       onPanResponderMove: (event) => {
         const { locationX, locationY } = event.nativeEvent;
-        setCurrentPath([...currentPath, { x: locationX, y: locationY }]);
+        currentPointRef.current.push({ x: locationX, y: locationY });
+        setRenderTrigger((prev) => !prev);
       },
       onPanResponderRelease: () => {
-        if (currentPath.length > 1) {
+        if (currentPointRef.current.length > 1) {
           const newPath: Path = {
-            points: currentPath,
+            points: [...currentPointRef.current],
             color: strokeColor,
             width: strokeWidth,
           };
-          const newPaths = [...paths, newPath];
-          setPaths(newPaths);
-          if (onPathsChange) {
-            onPathsChange(newPaths);
-          }
+          setPaths((prevPaths) => [...prevPaths, newPath]);
         }
-        setCurrentPath([]);
+        currentPointRef.current = [];
+        setRenderTrigger((prev) => !prev);
       },
     })
   ).current;
 
+  const getPathString = useCallback((points: Point[]) => {
+    return points
+      .map((point, i) => `${i === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+      .join(" ");
+  }, []);
+
   const renderPath = (path: Path, index: number) => {
     if (path.points.length < 2) return null;
 
-    const pathString = path.points
-      .map((point, i) => {
-        return `${i === 0 ? "M" : "L"} ${point.x} ${point.y}`;
-      })
-      .join(" ");
+    const pathString = getPathString(path.points);
 
     return (
-      <Animated.View key={index} style={StyleSheet.absoluteFill}>
-        <svg height="100%" width="100%">
-          <path
-            d={pathString}
-            stroke={path.color}
-            strokeWidth={path.width}
-            fill="none"
-          />
-        </svg>
-      </Animated.View>
+      <Svg key={index} style={StyleSheet.absoluteFill}>
+        <SvgPath
+          d={pathString}
+          stroke={path.color}
+          strokeWidth={path.width}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
     );
   };
 
   const renderCurrentPath = () => {
-    if (currentPath.length < 2) return null;
+    if (currentPointRef.current.length < 2) return null;
 
-    const pathString = currentPath
-      .map((point, i) => {
-        return `${i === 0 ? "M" : "L"} ${point.x} ${point.y}`;
-      })
-      .join(" ");
+    const pathString = getPathString(currentPointRef.current);
 
     return (
-      <Animated.View style={StyleSheet.absoluteFill}>
-        <svg height="100%" width="100%">
-          <path
-            d={pathString}
-            stroke={strokeColor}
-            strokeWidth={strokeWidth}
-            fill="none"
-          />
-        </svg>
-      </Animated.View>
+      <Svg style={StyleSheet.absoluteFill}>
+        <SvgPath
+          d={pathString}
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
     );
-  };
-
-  const clearCanvas = () => {
-    setPaths([]);
-    if (onPathsChange) {
-      onPathsChange([]);
-    }
   };
 
   return (
     <View
       style={{
         flex: 1,
+        position: "relative",
         backgroundColor: colors.highlight,
         borderRadius: BorderRadius.lg,
       }}

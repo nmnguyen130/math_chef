@@ -1,6 +1,6 @@
 import React from "react";
 import { View } from "react-native";
-import { Card, Icon, Text } from "@components/ui";
+import { Card, Text } from "@components/ui";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@components/theme/theme-provider";
 import { BorderRadius } from "@constants/theme";
@@ -100,17 +100,13 @@ const PracticeCard: React.FC<PracticeCardProps> = ({
           </View>
         </View>
 
-        <Icon>
+        <View>
           {isCompleted ? (
-            <Feather
-              name="check-circle"
-              color={colors.success}
-              fill={colors.success}
-            />
+            <Feather name="check-circle" size={20} color={colors.success} />
           ) : (
-            <Feather name="file-text" color={colors.secondaryText} />
+            <Feather name="file-text" size={20} color={colors.secondaryText} />
           )}
-        </Icon>
+        </View>
       </View>
     </Card>
   );

@@ -7,25 +7,27 @@ import { Text, Button, Icon, Card, Input } from "@components/ui";
 import { DrawingCanvas, MathKeyboard } from "@components/math";
 import { Colors } from "@constants/theme";
 
+type StrokePath = {
+  points: { x: number; y: number }[]; // Adjust if needed
+  color: string;
+  width: number;
+};
+
 const DrawScreen = () => {
   const { colors, isDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState("draw");
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(3);
-  const [paths, setPaths] = useState([]);
+  const [paths, setPaths] = useState<StrokePath[]>([]);
   const [equation, setEquation] = useState("");
   const router = useRouter();
 
-  const handlePathsChange = (newPaths) => {
+  const handlePathsChange = (newPaths: StrokePath[]) => {
     setPaths(newPaths);
   };
 
   const handleUndo = () => {
-    if (paths.length > 0) {
-      const newPaths = [...paths];
-      newPaths.pop();
-      setPaths(newPaths);
-    }
+    setPaths((prevPaths) => prevPaths.slice(0, prevPaths.length - 1));
   };
 
   const handleClear = () => {
@@ -36,7 +38,7 @@ const DrawScreen = () => {
     router.push("/solve/x");
   };
 
-  const handleKeyPress = (key) => {
+  const handleKeyPress = (key: string) => {
     if (key === "backspace") {
       setEquation(equation.slice(0, -1));
     } else if (key === "clear") {
@@ -145,10 +147,14 @@ const DrawScreen = () => {
               <DrawingCanvas
                 strokeColor={strokeColor}
                 strokeWidth={strokeWidth}
-                onPathsChange={handlePathsChange}
+                paths={paths}
+                setPaths={setPaths}
               />
               {paths.length === 0 && (
-                <View className="absolute inset-0 justify-center items-center">
+                <View
+                  pointerEvents="none"
+                  className="absolute inset-0 justify-center items-center"
+                >
                   <Text color={colors.secondaryText}>
                     Draw your equation here
                   </Text>
@@ -168,7 +174,7 @@ const DrawScreen = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  leftIcon={<Ionicons name="arrow-undo-outline" />}
+                  leftIcon={<Ionicons name="arrow-undo-outline" size={18} />}
                   onPress={handleUndo}
                   className="mr-2"
                   isDisabled={paths.length === 0}
@@ -178,7 +184,7 @@ const DrawScreen = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  leftIcon={<Feather name="trash-2" />}
+                  leftIcon={<Feather name="trash-2" size={18} />}
                   onPress={handleClear}
                   isDisabled={paths.length === 0}
                 >
@@ -190,7 +196,7 @@ const DrawScreen = () => {
                 <Button
                   variant={strokeWidth === 3 ? "primary" : "secondary"}
                   size="sm"
-                  leftIcon={<FontAwesome name="pencil" />}
+                  leftIcon={<FontAwesome name="pencil" size={18} />}
                   onPress={() => setStrokeWidth(3)}
                   className="mr-2"
                 >
@@ -199,7 +205,7 @@ const DrawScreen = () => {
                 <Button
                   variant={strokeWidth === 6 ? "primary" : "secondary"}
                   size="sm"
-                  leftIcon={<FontAwesome name="eraser" />}
+                  leftIcon={<FontAwesome name="eraser" size={18} />}
                   onPress={() => setStrokeWidth(6)}
                 >
                   Thick

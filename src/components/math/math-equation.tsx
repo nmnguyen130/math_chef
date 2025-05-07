@@ -62,7 +62,7 @@ const MathEquation: React.FC<MathEquationProps> = ({
         padding: cardPadding,
       }}
     >
-      <View style={{ width: "100%", height: getFontSize() * 2.5 }}>
+      <View style={{ width: "100%", height: getFontSize() * 2 }}>
         <WebView
           originWhitelist={["*"]}
           source={{ html: htmlContent }}

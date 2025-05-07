@@ -57,7 +57,7 @@ const VideoCard: React.FC<VideoCardProps> = ({
         {/* Play button overlay */}
         <View className="absolute inset-0 items-center justify-center">
           <View className="bg-black/50 rounded-full p-3">
-            <Feather name="play" size={24} color="#fff" fill="#fff" />
+            <Feather className="ml-1" name="play" size={24} color="#fff" />
           </View>
         </View>
 

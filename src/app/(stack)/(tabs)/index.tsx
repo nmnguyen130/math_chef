@@ -25,31 +25,31 @@ const HomeScreen = () => {
     {
       title: "Draw Equations",
       description: "Write naturally as on paper",
-      icon: <FontAwesome name="pencil" color={colors.primary} />,
+      icon: <FontAwesome name="pencil" size={20} color={colors.primary} />,
       route: "/(stack)/draw",
     },
     {
       title: "Scan & Solve",
       description: "Take a photo of your math problem",
-      icon: <Feather name="camera" color={colors.secondary} />,
+      icon: <Feather name="camera" size={20} color={colors.secondary} />,
       route: "/(stack)/(tabs)/scan",
     },
     {
       title: "Step-by-Step",
       description: "Get detailed explanations",
-      icon: <Feather name="book-open" color={colors.accent} />,
+      icon: <Feather name="book-open" size={20} color={colors.accent} />,
       route: "/(stack)/solve/x",
     },
     {
       title: "Practice Problems",
       description: "Improve your skills with examples",
-      icon: <Feather name="book" color={colors.primary} />,
+      icon: <Feather name="book" size={20} color={colors.primary} />,
       route: "/(stack)/(tabs)/practice",
     },
     {
       title: "Tutorial Videos",
       description: "Learn from expert instructors",
-      icon: <Feather name="video" color={colors.secondary} />,
+      icon: <Feather name="video" size={20} color={colors.secondary} />,
       route: "/(stack)/(tabs)/videos",
     },
   ];
@@ -179,7 +179,11 @@ const HomeScreen = () => {
                     {feature.description}
                   </Text>
                 </View>
-                <Feather name="chevron-right" color={colors.secondaryText} />
+                <Feather
+                  name="chevron-right"
+                  size={20}
+                  color={colors.secondaryText}
+                />
               </View>
             </Card>
           ))}
@@ -208,17 +212,17 @@ const HomeScreen = () => {
                     index === 0 ? colors.primary : colors.secondary,
                 }}
               />
-              <View className="p-3">
+              <View className="py-2 px-3">
                 <MathEquation equation={problem.equation} />
                 <View className="flex-row justify-between items-center mt-2">
                   <Text variant="body-sm" color={colors.secondaryText}>
                     {problem.type}
                   </Text>
                   <View className="flex-row items-center">
-                    <View className="mr-1">
+                    <View className="mr-2">
                       <FontAwesome
                         name="lightbulb-o"
-                        size={14}
+                        size={20}
                         color={problem.color}
                       />
                     </View>

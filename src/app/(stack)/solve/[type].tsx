@@ -2,12 +2,12 @@ import { View, ScrollView } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useTheme } from "@components/theme/theme-provider";
 import { Feather } from "@expo/vector-icons";
-import { Text, Card, Button, Icon } from "@components/ui";
+import { Text, Card, Button } from "@components/ui";
 import { MathEquation, StepByStepSolution, GraphView } from "@components/math";
 
 const SolveScreen = () => {
   const { type } = useLocalSearchParams();
-  const { isDarkMode } = useTheme();
+  const { colors, isDarkMode } = useTheme();
 
   // Sample data based on the type parameter
   const getEquation = () => {
@@ -90,28 +90,31 @@ const SolveScreen = () => {
       <View className="p-4">
         <View className="mb-4">
           <Text variant="h2">{equationData.title}</Text>
-          <Text variant="body" style={{ marginTop: 4 }}>
+          <Text variant="body" className="mt-1">
             {equationData.method}
           </Text>
         </View>
 
-        <Card variant="outlined" style={{ marginBottom: 24 }}>
-          <MathEquation equation={equationData.equation} size="lg" />
-          <View className="flex-row justify-end mt-4">
+        <Card variant="outlined" className="mb-4">
+          <MathEquation equation={equationData.equation} size="md" />
+          <View className="flex-row justify-end mt-2">
             <Button
               variant="ghost"
-              leftIcon={<Feather name="edit" />}
-              style={{ marginRight: 8 }}
+              leftIcon={<Feather name="edit" size={20} />}
+              className="mr-2"
             >
               Edit
             </Button>
-            <Button variant="ghost" leftIcon={<Feather name="bookmark" />}>
+            <Button
+              variant="ghost"
+              leftIcon={<Feather name="bookmark" size={20} />}
+            >
               Save
             </Button>
           </View>
         </Card>
 
-        <Text variant="h3" style={{ marginBottom: 16 }}>
+        <Text variant="h3" className="mt-2">
           Solution Steps
         </Text>
 
