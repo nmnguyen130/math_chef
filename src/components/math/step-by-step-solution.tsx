@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { View, TouchableOpacity } from "react-native";
-import { Text, Card, Icon } from "@components/ui";
+import { Text, Card } from "@components/ui";
 import { Feather } from "@expo/vector-icons";
 import MathEquation from "./math-equation";
 import { useTheme } from "@components/theme/theme-provider";
@@ -58,13 +58,11 @@ const StepByStepSolution: React.FC<StepByStepSolutionProps> = ({
             className="flex-row justify-between items-center px-3"
           >
             <Text weight="medium">Step {index + 1}</Text>
-            <Icon>
-              {expandedSteps.includes(index) ? (
-                <Feather name="chevron-up" />
-              ) : (
-                <Feather name="chevron-down" />
-              )}
-            </Icon>
+            {expandedSteps.includes(index) ? (
+              <Feather name="chevron-up" />
+            ) : (
+              <Feather name="chevron-down" />
+            )}
           </TouchableOpacity>
 
           {expandedSteps.includes(index) && (

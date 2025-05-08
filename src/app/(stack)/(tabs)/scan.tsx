@@ -1,17 +1,12 @@
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "expo-router";
-import {
-  View,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
+import { useState, useRef, useCallback } from "react";
+import { useIsFocused } from "@react-navigation/native";
+import { useRouter, useFocusEffect } from "expo-router";
+import { View, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 import { useTheme } from "@components/theme/theme-provider";
 import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
 import {} from "@expo/vector-icons";
-import { Text, Button, Icon, Card } from "@components/ui";
+import { Text, Button, Card } from "@components/ui";
 import { MathEquation } from "@components/math";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
@@ -22,6 +17,7 @@ const ScanScreen = () => {
   const { colors, isDarkMode } = useTheme();
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
+  const isFocused = useIsFocused();
 
   const [scanComplete, setScanComplete] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
@@ -31,7 +27,13 @@ const ScanScreen = () => {
 
   const { loading, error, result, fetchLatexFromImage } = useMathCapture();
 
-  const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        resetCamera();
+      };
+    }, [])
+  );
 
   const takePicture = async () => {
     if (cameraRef.current) {
@@ -145,36 +147,34 @@ const ScanScreen = () => {
                     style={styles.cancelButton}
                     onPress={resetCamera}
                   >
-                    <Icon>
-                      <Feather name="x" color={isDarkMode ? "#fff" : "#000"} />
-                    </Icon>
+                    <Feather name="x" color={isDarkMode ? "#fff" : "#000"} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="w-12 h-12 rounded-full flex items-center justify-center"
                     style={styles.confirmButton}
                     onPress={() => setScanComplete(true)}
                   >
-                    <Icon>
-                      <Feather name="check" color="#fff" />
-                    </Icon>
+                    <Feather name="check" color="#fff" />
                   </TouchableOpacity>
                 </View>
               )}
             </View>
           ) : (
-            <CameraView ref={cameraRef} style={{ flex: 1 }}>
+            <View className="flex-1">
+              {isFocused && (
+                <CameraView ref={cameraRef} style={StyleSheet.absoluteFill} />
+              )}
+
+              {/* Overlay UI */}
               <View className="flex-1 items-center justify-center">
-                <View
-                  className="w-3/4 h-1/4 border-2 rounded-xl"
-                  style={{ borderColor: colors.primary }}
-                />
+                <View className="w-3/4 h-1/4 border-2 border-white rounded-lg" />
               </View>
 
               <Card
                 variant="elevated"
-                className="absolute top-4 left-3 right-3 p-2"
+                className="absolute top-4 left-3 right-3 p-2 items-center"
               >
-                <Text variant="body-sm" className="text-center">
+                <Text variant="body-sm">
                   Position your math problem within the frame
                 </Text>
               </Card>
@@ -193,7 +193,7 @@ const ScanScreen = () => {
                   </TouchableOpacity>
                 </View>
 
-                <View className="flex-row justify-between">
+                <View className="flex-row justify-between mt-2">
                   <Button
                     variant="primary"
                     leftIcon={<Feather name="image" size={20} color={"#fff"} />}
@@ -220,7 +220,7 @@ const ScanScreen = () => {
                   </Button>
                 </View>
               </View>
-            </CameraView>
+            </View>
           )}
         </>
       ) : (
