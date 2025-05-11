@@ -3,9 +3,9 @@ import { useIsFocused } from "@react-navigation/native";
 import { useRouter, useFocusEffect } from "expo-router";
 import { View, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { Image } from "expo-image";
+import * as ImageManipulator from "expo-image-manipulator";
 import { useTheme } from "@components/theme/theme-provider";
 import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
-import {} from "@expo/vector-icons";
 import { Text, Button, Card } from "@components/ui";
 import { MathEquation } from "@components/math";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -41,8 +41,15 @@ const ScanScreen = () => {
         const photo = await cameraRef.current?.takePictureAsync();
         if (!photo) return;
 
-        setImageUri(photo.uri);
-        processImage(photo.uri);
+        // Resize image to 500x600
+        const resizedImage = await ImageManipulator.manipulateAsync(
+          photo.uri,
+          [{ resize: { width: 500, height: 500  } }],
+          { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+        );
+
+        setImageUri(resizedImage.uri);
+        processImage(resizedImage.uri);
       } catch (error) {
         console.error("Error taking picture:", error);
       }
@@ -53,13 +60,21 @@ const ScanScreen = () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
     });
 
     if (!result.canceled && result.assets?.[0]?.uri) {
       setImageUri(result.assets[0].uri);
       processImage(result.assets[0].uri);
+    }
+  };
+
+  const captureImage = async () => {
+    try {
+      await ImagePicker.requestCameraPermissionsAsync();
+      let result = await ImagePicker.launchCameraAsync({});
+    } catch (error) {
+      console.error("Error taking picture:", error);
     }
   };
 
@@ -236,10 +251,9 @@ const ScanScreen = () => {
                 style={{
                   width: "100%",
                   height: 200,
-                  aspectRatio: 4 / 3,
                   borderRadius: 8,
                 }}
-                contentFit="cover"
+                contentFit="contain"
               />
             </View>
           )}
@@ -251,7 +265,7 @@ const ScanScreen = () => {
                   <Text weight="medium" className="mb-2">
                     Detected Equation
                   </Text>
-                  <MathEquation equation={result.latex} />
+                  <MathEquation equation={result.equation} />
                 </View>
               </Card>
 

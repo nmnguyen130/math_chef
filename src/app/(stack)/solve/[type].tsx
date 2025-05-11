@@ -6,93 +6,41 @@ import { Text, Card, Button } from "@components/ui";
 import { MathEquation, StepByStepSolution, GraphView } from "@components/math";
 import { useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
+import { useMathCapture } from "@hooks/useMathCapture";
 
 const SolveScreen = () => {
   const { type, imageData } = useLocalSearchParams();
   const { colors, isDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
+  const [equationData, setEquationData] = useState({
+    type: "",
+    equation: "",
+    steps: [],
+  });
 
-  // Sample data based on the type parameter
-  const getEquation = () => {
-    if (type === "x") {
-      return {
-        title: "Solve for x",
-        method: "Steps Using the Quadratic Formula",
-        equation: "x² - 4x - 5 = 0",
-        steps: [
-          {
-            explanation:
-              "This equation is in standard form: ax² + bx + c = 0. Substitute 1 for a, -4 for b, and -5 for c in the quadratic formula.",
-            equation: "(-b ± √(b² - 4ac)) / 2a",
-          },
-          {
-            explanation: "Substitute the values into the formula",
-            equation: "x = (-(-4) ± √((-4)² - 4(1)(-5))) / 2(1)",
-          },
-          {
-            explanation: "Simplify the expression",
-            equation: "x = (4 ± √(16 + 20)) / 2",
-          },
-          {
-            explanation: "Continue simplifying",
-            equation: "x = (4 ± √36) / 2",
-          },
-          {
-            explanation: "Take the square root",
-            equation: "x = (4 ± 6) / 2",
-          },
-          {
-            explanation: "Calculate both solutions",
-            equation: "x = 5 or x = -1",
-          },
-        ],
-      };
-    } else if (type === "θ") {
-      return {
-        title: "Solve for θ",
-        method: "Trigonometric Equation",
-        equation: "4 sin θ cos θ = 2 sin θ",
-        steps: [
-          {
-            explanation: "Factor out sin θ from both sides",
-            equation: "4 sin θ cos θ = 2 sin θ",
-          },
-          {
-            explanation: "Divide both sides by sin θ (note: sin θ ≠ 0)",
-            equation: "4 cos θ = 2",
-          },
-          {
-            explanation: "Divide both sides by 4",
-            equation: "cos θ = 1/2",
-          },
-          {
-            explanation: "Find the angles where cos θ = 1/2",
-            equation: "θ = π/3 + 2πn or θ = -π/3 + 2πn, n ∈ Z",
-          },
-        ],
-      };
-    } else {
-      return {
-        title: `Solve for ${type}`,
-        method: "General Method",
-        equation: "Example equation",
-        steps: [
-          {
-            explanation: "Step 1",
-            equation: "Example formula",
-          },
-        ],
-      };
-    }
-  };
-
-  const equationData = getEquation();
+  const { loading, error, result, fetchLatexFromImage } = useMathCapture();
 
   useEffect(() => {
     if (imageData) {
-      setIsLoading(false);
+      fetchLatexFromImage(imageData as string);
     }
   }, [imageData]);
+
+  useEffect(() => {
+    if (result) {
+      setEquationData((prev) => ({
+        ...prev,
+        equation: result.equation || "",
+      }));
+      setIsLoading(false);
+    }
+  }, [result]);
+
+  useEffect(() => {
+    if (error) {
+      setIsLoading(false);
+    }
+  }, [error]);
 
   return (
     <ScrollView className={`flex-1 ${isDarkMode ? "bg-black" : "bg-white"}`}>
@@ -117,9 +65,8 @@ const SolveScreen = () => {
         ) : (
           <>
             <View className="mb-4">
-              <Text variant="h2">{equationData.title}</Text>
-              <Text variant="body" className="mt-1">
-                {equationData.method}
+              <Text variant="h3" className="mt-1">
+                {equationData.type}
               </Text>
             </View>
 

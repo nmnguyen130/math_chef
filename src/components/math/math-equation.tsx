@@ -1,77 +1,90 @@
 import React from "react";
-import { View, Dimensions } from "react-native";
-import { WebView } from "react-native-webview";
-import { Card } from "@components/ui";
-import { useTheme } from "@components/theme/theme-provider";
+import { StyleSheet, View, ViewStyle, StyleProp } from "react-native";
+import KaTeXInline from "./katex_inline";
+import Card from "../ui/card";
 
-interface MathEquationProps {
+type CardVariant = "elevated" | "outlined" | "filled";
+
+export interface MathEquationProps {
   equation: string;
-  isHighlighted?: boolean;
-  showBorder?: boolean;
   size?: "sm" | "md" | "lg";
+  bordered?: boolean;
+  withText?: boolean;
+  displayMode?: boolean;
+  /** Variant of the card (only applies when bordered is true) */
+  cardVariant?: CardVariant;
+  style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 const MathEquation: React.FC<MathEquationProps> = ({
   equation,
-  isHighlighted = false,
-  showBorder = true,
   size = "md",
+  bordered = false,
+  withText = false,
+  displayMode = false,
+  cardVariant = "outlined",
+  style,
+  containerStyle,
 }) => {
-  const { colors } = useTheme();
-
   const getFontSize = () => {
     switch (size) {
       case "sm":
-        return 20;
+        return 12;
       case "md":
-        return 24;
+        return 16;
       case "lg":
-        return 28;
+        return 20;
       default:
-        return 24;
+        return 16;
     }
   };
 
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-      <style>
-        body { display: flex; justify-content: center; align-items: center;}
-        div { font-size: ${getFontSize()}px; }
-      </style>
-    </head>
-    <body>
-      <div>
-        \\(${equation}\\)
-      </div>
-    </body>
-    </html>
-  `;
+  const fontSize = getFontSize();
+  const formatEquation = (eq: string, isDisplayMode: boolean) => {
+    // If withText is true, return equation as-is without any delimiters
+    if (withText) return eq;
 
-  const cardPadding = size === "sm" ? 6 : size === "lg" ? 14 : 10;
+    // For non-withText mode, check if already wrapped in delimiters
+    if (eq.startsWith("\\[") && eq.endsWith("\\]")) return eq;
+    if (eq.startsWith("\\(") && eq.endsWith("\\)")) return eq;
+    if (eq.startsWith("$") && eq.endsWith("$")) return eq;
 
-  return (
-    <Card
-      variant={showBorder ? "outlined" : "filled"}
-      style={{
-        backgroundColor: isHighlighted ? `${colors.primary}20` : colors.card,
-        borderColor: isHighlighted ? colors.primary : colors.border,
-        padding: cardPadding,
-      }}
-    >
-      <View style={{ width: "100%", height: getFontSize() * 2 }}>
-        <WebView
-          originWhitelist={["*"]}
-          source={{ html: htmlContent }}
-          style={{ backgroundColor: "transparent" }}
-          scrollEnabled={false}
-        />
-      </View>
-    </Card>
+    // Wrap in appropriate delimiters based on display mode
+    return isDisplayMode ? `\\[ ${eq} \\]` : `\\( ${eq} \\)`;
+  };
+
+  const equationContent = (
+    <View style={[styles.container, displayMode && styles.displayMode, style]}>
+      <KaTeXInline
+        expression={formatEquation(equation, displayMode)}
+        fontSize={fontSize}
+      />
+    </View>
   );
+
+  if (bordered) {
+    return (
+      <Card variant={cardVariant} style={[styles.card, containerStyle]}>
+        {equationContent}
+      </Card>
+    );
+  }
+
+  return equationContent;
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 4,
+  },
+  displayMode: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  card: {
+    width: "100%",
+  },
+});
 
 export default MathEquation;

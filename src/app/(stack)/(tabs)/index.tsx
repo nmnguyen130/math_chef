@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import { useTheme } from "@components/theme/theme-provider";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { Text, Card, Button } from "@components/ui";
-import { MathEquation } from "@components/math";
+import { KaTeXInline, MathEquation } from "@components/math";
 
 type RoutePath =
   | "/(stack)/draw"
@@ -56,7 +56,7 @@ const HomeScreen = () => {
 
   const recentProblems = [
     {
-      equation: "x² - 4x - 5 = 0",
+      equation: "a^2 + b^2 = c^2",
       type: "Quadratic Equation",
       color: colors.primary,
     },
@@ -84,7 +84,7 @@ const HomeScreen = () => {
         >
           <View className="flex-row justify-between items-center mb-2">
             <Text variant="h1" color={colors.primary}>
-              Math Solver
+              Math Chef
             </Text>
             <TouchableOpacity
               className="rounded-full p-2"
@@ -198,6 +198,14 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
 
+          <View style={{ marginVertical: 16 }}>
+            <KaTeXInline
+              expression={
+                "This is an equation: \\(a^2 + b^2 = c^2\\) in the middle of text"
+              }
+            />
+          </View>
+
           {recentProblems.map((problem, index) => (
             <Card
               key={index}
@@ -213,7 +221,7 @@ const HomeScreen = () => {
                 }}
               />
               <View className="py-2 px-3">
-                <MathEquation equation={problem.equation} />
+                <MathEquation equation={problem.equation} bordered />
                 <View className="flex-row justify-between items-center mt-2">
                   <Text variant="body-sm" color={colors.secondaryText}>
                     {problem.type}

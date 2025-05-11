@@ -15,7 +15,7 @@ interface Key {
   isIcon?: boolean;
 }
 
-export const MathKeyboard: React.FC<MathKeyboardProps> = ({ onKeyPress }) => {
+const MathKeyboard: React.FC<MathKeyboardProps> = ({ onKeyPress }) => {
   const { colors, isDarkMode } = useTheme();
 
   const keys: Key[][] = [
@@ -88,3 +88,5 @@ export const MathKeyboard: React.FC<MathKeyboardProps> = ({ onKeyPress }) => {
     </View>
   );
 };
+
+export default MathKeyboard;
