@@ -31,8 +31,6 @@ const Card: React.FC<CardProps> = ({
     const baseStyle: ViewStyle = {
       borderRadius: BorderRadius.xl,
       padding: 16,
-      minHeight: 1, // Ensures the card can shrink below its content height if needed
-      flexShrink: 1, // Allows the card to shrink if needed
     };
 
     switch (variant) {

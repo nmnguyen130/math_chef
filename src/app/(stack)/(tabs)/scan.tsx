@@ -1,17 +1,22 @@
 import { useState, useRef, useCallback } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter, useFocusEffect } from "expo-router";
-import { View, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
-import { Image } from "expo-image";
-import * as ImageManipulator from "expo-image-manipulator";
-import { useTheme } from "@components/theme/theme-provider";
-import { Feather, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { Text, Button, Card } from "@components/ui";
-import { MathEquation } from "@components/math";
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 
+import { useTheme } from "@components/theme/theme-provider";
+import { Text, Button, Card } from "@components/ui";
+import { MathEquation } from "@components/math";
 import { useMathCapture } from "@hooks/useMathCapture";
+import ImageProcessor from "@components/image-processor";
 
 const ScanScreen = () => {
   const { colors, isDarkMode } = useTheme();
@@ -22,6 +27,7 @@ const ScanScreen = () => {
   const [scanComplete, setScanComplete] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [capturedPhotoUri, setCapturedPhotoUri] = useState<string | null>(null);
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
@@ -40,16 +46,8 @@ const ScanScreen = () => {
       try {
         const photo = await cameraRef.current?.takePictureAsync();
         if (!photo) return;
-
-        // Resize image to 500x600
-        const resizedImage = await ImageManipulator.manipulateAsync(
-          photo.uri,
-          [{ resize: { width: 500, height: 500  } }],
-          { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
-        );
-
-        setImageUri(resizedImage.uri);
-        processImage(resizedImage.uri);
+        console.log(photo.width, photo.height);
+        setCapturedPhotoUri(photo.uri);
       } catch (error) {
         console.error("Error taking picture:", error);
       }
@@ -85,9 +83,16 @@ const ScanScreen = () => {
     setScanComplete(true);
   };
 
+  const handleProcessedImage = (uri: string) => {
+    setImageUri(uri);
+    processImage(uri);
+    setCapturedPhotoUri(null);
+  };
+
   const resetCamera = () => {
     setImageUri(null);
     setScanComplete(false);
+    setCapturedPhotoUri(null);
   };
 
   const styles = StyleSheet.create({
@@ -96,19 +101,6 @@ const ScanScreen = () => {
     },
     confirmButton: {
       backgroundColor: colors.primary,
-    },
-    highlightedCard: {
-      marginBottom: 16,
-      borderWidth: 2,
-      borderColor: colors.primary,
-    },
-    graphPlaceholder: {
-      height: 160,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: isDarkMode ? colors.highlight : "#f5f5f5",
-      borderRadius: 8,
-      marginTop: 8,
     },
   });
 
@@ -127,6 +119,12 @@ const ScanScreen = () => {
 
   return (
     <View className="flex-1" style={{ backgroundColor: colors.background }}>
+      {capturedPhotoUri && (
+        <ImageProcessor
+          uri={capturedPhotoUri}
+          onProcessed={handleProcessedImage}
+        />
+      )}
       {!scanComplete ? (
         <>
           {imageUri ? (
@@ -182,7 +180,7 @@ const ScanScreen = () => {
 
               {/* Overlay UI */}
               <View className="flex-1 items-center justify-center">
-                <View className="w-3/4 h-1/4 border-2 border-white rounded-lg" />
+                <View className="w-3/4 aspect-square border-2 border-white rounded-lg" />
               </View>
 
               <Card
@@ -252,8 +250,8 @@ const ScanScreen = () => {
                   width: "100%",
                   height: 200,
                   borderRadius: 8,
+                  resizeMode: "contain",
                 }}
-                contentFit="contain"
               />
             </View>
           )}
@@ -266,25 +264,6 @@ const ScanScreen = () => {
                     Detected Equation
                   </Text>
                   <MathEquation equation={result.equation} />
-                </View>
-              </Card>
-
-              <Card variant="outlined" style={styles.highlightedCard}>
-                <View className="px-3">
-                  <Text weight="medium" className="mb-2">
-                    Solution
-                  </Text>
-                  <MathEquation equation={result.solution} isHighlighted />
-                  <View className="flex-row items-center mt-2">
-                    <View className="mr-2">
-                      <FontAwesome
-                        name="lightbulb-o"
-                        size={20}
-                        color={colors.primary}
-                      />
-                    </View>
-                    <Text color={colors.primary}>Solution found</Text>
-                  </View>
                 </View>
               </Card>
 
@@ -331,74 +310,6 @@ const ScanScreen = () => {
           ) : (
             <Text>Waiting for result...</Text>
           )}
-
-          {/* <Card variant="outlined" className="mb-4">
-            <View className="p-3">
-              <Text weight="medium" className="mb-2">
-                1. Solve the linear equation
-              </Text>
-              <MathEquation equation="(2x-3)/5 + (4x-1)/10 = 1" />
-            </View>
-          </Card>
-
-          <Card variant="outlined" style={styles.highlightedCard}>
-            <View className="p-3">
-              <Text weight="medium" className="mb-2">
-                Solve for x
-              </Text>
-              <MathEquation equation="x = 17/8 - 1/8 = 2.125" isHighlighted />
-              <View className="flex-row items-center mt-2">
-                <Icon className="mr-2">
-                  <Lightbulb size={16} color={colors.primary} />
-                </Icon>
-                <Text color={colors.primary}>Solution found</Text>
-              </View>
-            </View>
-          </Card>
-
-          <Text weight="medium" className="mb-2">
-            Steps for Solving Linear Equation
-          </Text>
-
-          <Button
-            variant="primary"
-            className="mb-4"
-            onPress={() => router.push("/(stack)/solve/x")}
-          >
-            Get step-by-step solution
-          </Button>
-
-          <Card variant="outlined" className="mb-4">
-            <View className="p-3">
-              <Text weight="medium" className="mb-2">
-                Graph
-              </Text>
-              <View style={styles.graphPlaceholder}>
-                <Text color={colors.secondaryText}>
-                  Graph visualization would appear here
-                </Text>
-              </View>
-            </View>
-          </Card>
-
-          <View className="flex-row my-2">
-            <Button
-              variant="outline"
-              leftIcon={<Check color={colors.primary} />}
-              className="flex-1 mr-2"
-              onPress={resetCamera}
-            >
-              Scan Another
-            </Button>
-
-            <Button
-              variant="primary"
-              className="flex-1"
-              onPress={() => router.push("/(stack)/solve/x")}
-            >
-              Solve
-            </Button>
-          </View> */}
         </ScrollView>
       )}
     </View>

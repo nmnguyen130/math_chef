@@ -221,7 +221,11 @@ const HomeScreen = () => {
                 }}
               />
               <View className="py-2 px-3">
-                <MathEquation equation={problem.equation} bordered />
+                <MathEquation
+                  equation={problem.equation}
+                  bordered
+                  displayMode
+                />
                 <View className="flex-row justify-between items-center mt-2">
                   <Text variant="body-sm" color={colors.secondaryText}>
                     {problem.type}
