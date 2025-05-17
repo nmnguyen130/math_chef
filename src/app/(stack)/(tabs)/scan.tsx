@@ -1,16 +1,12 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useIsFocused } from "@react-navigation/native";
-import { useRouter, useFocusEffect } from "expo-router";
-import {
-  View,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
+import { useRouter } from "expo-router";
+import { View, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
+import { Buffer } from "buffer";
 
 import { useTheme } from "@components/theme/theme-provider";
 import { Text, Button, Card } from "@components/ui";
@@ -30,23 +26,13 @@ const ScanScreen = () => {
   const [capturedPhotoUri, setCapturedPhotoUri] = useState<string | null>(null);
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
-
   const { loading, error, result, fetchLatexFromImage } = useMathCapture();
-
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        resetCamera();
-      };
-    }, [])
-  );
 
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current?.takePictureAsync();
         if (!photo) return;
-        console.log(photo.width, photo.height);
         setCapturedPhotoUri(photo.uri);
       } catch (error) {
         console.error("Error taking picture:", error);
@@ -67,15 +53,6 @@ const ScanScreen = () => {
     }
   };
 
-  const captureImage = async () => {
-    try {
-      await ImagePicker.requestCameraPermissionsAsync();
-      let result = await ImagePicker.launchCameraAsync({});
-    } catch (error) {
-      console.error("Error taking picture:", error);
-    }
-  };
-
   const processImage = async (uri: string) => {
     setIsProcessing(true);
     await fetchLatexFromImage(uri);
@@ -90,9 +67,9 @@ const ScanScreen = () => {
   };
 
   const resetCamera = () => {
-    setImageUri(null);
     setScanComplete(false);
     setCapturedPhotoUri(null);
+    setImageUri(null);
   };
 
   const styles = StyleSheet.create({
@@ -129,7 +106,14 @@ const ScanScreen = () => {
         <>
           {imageUri ? (
             <View className="flex-1">
-              <Image source={{ uri: imageUri }} style={{ flex: 1 }} />
+              <Image
+                source={{ uri: imageUri }}
+                style={{
+                  flex: 1,
+                  width: "100%",
+                }}
+                contentFit="contain"
+              />
               {isProcessing ? (
                 <View className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <Card
@@ -250,8 +234,8 @@ const ScanScreen = () => {
                   width: "100%",
                   height: 200,
                   borderRadius: 8,
-                  resizeMode: "contain",
                 }}
+                contentFit="contain"
               />
             </View>
           )}
@@ -263,7 +247,11 @@ const ScanScreen = () => {
                   <Text weight="medium" className="mb-2">
                     Detected Equation
                   </Text>
-                  <MathEquation equation={result.equation} />
+                  <MathEquation
+                    equation={result.equation}
+                    displayMode
+                    size="lg"
+                  />
                 </View>
               </Card>
 
@@ -282,7 +270,20 @@ const ScanScreen = () => {
                 <Button
                   variant="primary"
                   className="flex-1"
-                  onPress={() => router.push("/(stack)/solve/x")}
+                  onPress={() => {
+                    if (imageUri) {
+                      const encodedUri = Buffer.from(imageUri, "utf8").toString(
+                        "base64"
+                      );
+                      router.push({
+                        pathname: "/(stack)/solve/[type]",
+                        params: {
+                          type: "x",
+                          encodedUri: encodedUri,
+                        },
+                      });
+                    }
+                  }}
                 >
                   Solve
                 </Button>

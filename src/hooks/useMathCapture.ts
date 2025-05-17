@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_URL = process.env.EXPO_PUBLIC_MATHWRITING_TO_LATEX_MODEL_API || "";
+const API_URL = process.env.EXPO_PUBLIC_MODEL_API || "";
 const PREDICT_URL = `${API_URL}/predict`;
 
 export const useMathCapture = () => {

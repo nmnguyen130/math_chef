@@ -1,18 +1,13 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { View, TouchableOpacity } from "react-native";
-import { Text, Card } from "@components/ui";
 import { Feather } from "@expo/vector-icons";
-import MathEquation from "./math-equation";
+
+import { Text, Card } from "@components/ui";
+import KaTeXInline from "./katex_inline";
 import { useTheme } from "@components/theme/theme-provider";
 
-interface Step {
-  explanation: string;
-  equation: string;
-}
-
 interface StepByStepSolutionProps {
-  steps: Step[];
+  steps: string[];
   initialExpandedSteps?: number[];
 }
 
@@ -22,7 +17,7 @@ const StepByStepSolution: React.FC<StepByStepSolutionProps> = ({
 }) => {
   const [expandedSteps, setExpandedSteps] =
     useState<number[]>(initialExpandedSteps);
-  const { colors, isDarkMode } = useTheme();
+  const { colors } = useTheme();
 
   const toggleStep = (index: number) => {
     if (expandedSteps.includes(index)) {
@@ -67,8 +62,7 @@ const StepByStepSolution: React.FC<StepByStepSolutionProps> = ({
 
           {expandedSteps.includes(index) && (
             <View className="p-3 pt-1">
-              <Text className="mb-2">{step.explanation}</Text>
-              <MathEquation equation={step.equation} size="sm" />
+              <KaTeXInline expression={step} />
             </View>
           )}
         </Card>

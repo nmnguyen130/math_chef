@@ -1,16 +1,24 @@
-import { View, ScrollView, Image } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { useTheme } from "@components/theme/theme-provider";
-import { Feather } from "@expo/vector-icons";
-import { Text, Card, Button } from "@components/ui";
-import { MathEquation, StepByStepSolution, GraphView } from "@components/math";
 import { useState, useEffect } from "react";
-import { ActivityIndicator } from "react-native";
+import { View, ScrollView, ActivityIndicator } from "react-native";
+import { Image } from "expo-image";
+import { useLocalSearchParams } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+import { Buffer } from "buffer";
+
+import { Text, Card, Button } from "@components/ui";
+import { useTheme } from "@components/theme/theme-provider";
+import { MathEquation, StepByStepSolution, GraphView } from "@components/math";
 import { useMathCapture } from "@hooks/useMathCapture";
+import { useEquationSolver } from "@hooks/useEquationSolver";
 
 const SolveScreen = () => {
-  const { type, imageData } = useLocalSearchParams();
+  const { type, encodedUri } = useLocalSearchParams<{
+    type: string;
+    encodedUri: string;
+  }>();
   const { colors, isDarkMode } = useTheme();
+  const imageUri = Buffer.from(encodedUri, "base64").toString("utf8");
+
   const [isLoading, setIsLoading] = useState(true);
   const [equationData, setEquationData] = useState({
     type: "",
@@ -18,39 +26,61 @@ const SolveScreen = () => {
     steps: [],
   });
 
-  const { loading, error, result, fetchLatexFromImage } = useMathCapture();
+  const {
+    error: errorCapture,
+    result: resultCapture,
+    fetchLatexFromImage,
+  } = useMathCapture();
+
+  const {
+    error: errorSolver,
+    result: resultSolver,
+    solveEquation,
+  } = useEquationSolver();
 
   useEffect(() => {
-    if (imageData) {
-      fetchLatexFromImage(imageData as string);
+    if (imageUri) {
+      fetchLatexFromImage(imageUri);
     }
-  }, [imageData]);
+  }, [imageUri]);
 
   useEffect(() => {
-    if (result) {
+    if (resultCapture?.equation) {
+      const detectedEquation = resultCapture.equation;
       setEquationData((prev) => ({
         ...prev,
-        equation: result.equation || "",
+        equation: detectedEquation,
+      }));
+
+      solveEquation(detectedEquation, "solve for x");
+    }
+  }, [resultCapture]);
+
+  useEffect(() => {
+    if (resultSolver) {
+      setEquationData((prev) => ({
+        ...prev,
+        steps: resultSolver.steps || [],
       }));
       setIsLoading(false);
     }
-  }, [result]);
+  }, [resultSolver]);
 
   useEffect(() => {
-    if (error) {
+    if (errorCapture || errorSolver) {
       setIsLoading(false);
     }
-  }, [error]);
+  }, [errorCapture, errorSolver]);
 
   return (
     <ScrollView className={`flex-1 ${isDarkMode ? "bg-black" : "bg-white"}`}>
       <View className="p-4">
-        {imageData && (
+        {imageUri && (
           <Card variant="outlined" className="mb-4 bg-black">
             <Image
-              source={{ uri: imageData as string }}
-              style={{ height: 200, aspectRatio: 1, alignSelf: "center" }}
-              resizeMode="contain"
+              source={{ uri: imageUri }}
+              style={{ width: "100%", height: 200, alignSelf: "center" }}
+              contentFit="contain"
             />
           </Card>
         )}
@@ -71,18 +101,26 @@ const SolveScreen = () => {
             </View>
 
             <Card variant="outlined" className="mb-4">
-              <MathEquation equation={equationData.equation} size="md" />
+              <MathEquation
+                equation={equationData.equation}
+                displayMode
+                size="lg"
+              />
               <View className="flex-row justify-end mt-2">
                 <Button
                   variant="ghost"
-                  leftIcon={<Feather name="edit" size={20} />}
+                  leftIcon={
+                    <Feather name="edit" size={16} color={colors.primary} />
+                  }
                   className="mr-2"
                 >
                   Edit
                 </Button>
                 <Button
                   variant="ghost"
-                  leftIcon={<Feather name="bookmark" size={20} />}
+                  leftIcon={
+                    <Feather name="bookmark" size={16} color={colors.primary} />
+                  }
                 >
                   Save
                 </Button>
