@@ -7,6 +7,8 @@ import { Text, Button, Card, Input } from "@components/ui";
 import { DrawingCanvas, MathKeyboard } from "@components/math";
 import { Colors } from "@constants/theme";
 import { WebView } from "react-native-webview";
+import * as FileSystem from "expo-file-system";
+import { Buffer } from "buffer";
 
 type StrokePath = {
   points: { x: number; y: number }[];
@@ -43,12 +45,12 @@ const htmlContent = `
         });
 
         // Calculate the width and height of the bounding box
-        const width = maxX - minX;
-        const height = maxY - minY;
+        const originalWidth = maxX - minX;
+        const originalHeight = maxY - minY;
 
         // Set canvas size to match the bounding box
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = originalWidth;
+        canvas.height = originalHeight;
 
         // Translate the context to the minimum point
         ctx.translate(-minX, -minY);
@@ -79,7 +81,16 @@ const htmlContent = `
         const exportCtx = exportCanvas.getContext('2d');
 
         // Draw the original canvas onto the export canvas
-        exportCtx.drawImage(canvas, 0, 0, 400, 400);
+        const scale = Math.min(400 / originalWidth, 400 / originalHeight);
+        const offsetX = (400 - originalWidth * scale) / 2;
+        const offsetY = (400 - originalHeight * scale) / 2;
+
+        exportCtx.fillStyle = 'white'; // hoặc transparent
+        exportCtx.fillRect(0, 0, 400, 400);
+
+        exportCtx.scale(scale, scale);
+        exportCtx.translate(offsetX / scale, offsetY / scale);
+        exportCtx.drawImage(canvas, 0, 0);
 
         // Get the data URL
         const dataUrl = exportCanvas.toDataURL('image/png');
@@ -120,13 +131,32 @@ const DrawScreen = () => {
   };
 
   // Handle WebView messages
-  const handleWebViewMessage = (event: any) => {
+  const handleWebViewMessage = async (event: any) => {
     const imageData = event.nativeEvent.data;
-    router.push({
-      pathname: "/solve/[type]",
-      params: { type: "x", imageData },
-    });
-    setIsLoading(false);
+
+    try {
+      const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
+
+      const fileUri = `${FileSystem.cacheDirectory}drawing-${Date.now()}.png`;
+
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      const encodedUri = Buffer.from(fileUri, "utf8").toString("base64");
+
+      router.push({
+        pathname: "/solve/[type]",
+        params: {
+          type: "image",
+          encodedUri: encodedUri,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to handle WebView image data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (key: string) => {

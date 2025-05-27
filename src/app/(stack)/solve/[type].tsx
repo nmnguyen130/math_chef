@@ -47,12 +47,17 @@ const SolveScreen = () => {
   useEffect(() => {
     if (resultCapture?.equation) {
       const detectedEquation = resultCapture.equation;
+
+      const hasX = /[xX]/.test(detectedEquation);
+      const type = hasX ? "Tìm x" : "Tính";
+
       setEquationData((prev) => ({
         ...prev,
+        type,
         equation: detectedEquation,
       }));
 
-      solveEquation(detectedEquation, "solve for x");
+      solveEquation(detectedEquation, type);
     }
   }, [resultCapture]);
 
@@ -133,7 +138,7 @@ const SolveScreen = () => {
 
             <StepByStepSolution steps={equationData.steps} />
 
-            {type === "x" && (
+            {equationData.type.includes("x") && (
               <View className="mt-6">
                 <Text variant="h3" style={{ marginBottom: 16 }}>
                   Graph

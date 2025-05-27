@@ -278,7 +278,7 @@ const ScanScreen = () => {
                       router.push({
                         pathname: "/(stack)/solve/[type]",
                         params: {
-                          type: "x",
+                          type: "image",
                           encodedUri: encodedUri,
                         },
                       });
